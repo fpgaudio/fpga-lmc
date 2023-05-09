@@ -14,13 +14,18 @@ get_target_property(LEAPC_SHARED_LIB_PATH LeapSDK::LeapC IMPORTED_LOCATION_${LEA
 add_library(
 	libExampleConnection
 	OBJECT
-	"lib/LeapSDK/samples/ExampleConnection.c")
+	"lib/LeapSDK/samples/ExampleConnection.c" "include/serial_device.h")
 target_include_directories(libExampleConnection PRIVATE "lib/LeapSDK/samples")
 target_link_libraries(libExampleConnection PUBLIC LeapSDK::LeapC)
 
 # Our binary
 # ----------
-add_executable(fpga-lmc "src/fpga-lmc.c")
+add_executable(fpga-lmc "src/fpga-lmc.c" "src/leap_math.c" "src/cli.c" "src/win_ex.c" "src/serial_device.c" "src/lmc.c")
+if(MSVC)
+  target_compile_options(fpga-lmc PRIVATE /W4 /WX /D_CRT_SECURE_NO_WARNINGS)
+else()
+  target_compile_options(fpga-lmc PRIVATE -Wall -Wextra -Wpedantic -Werror)
+endif()
 target_include_directories(fpga-lmc PRIVATE "include" "lib/LeapSDK/samples")
 target_link_libraries(fpga-lmc PRIVATE LeapSDK::LeapC)
 add_custom_command(TARGET fpga-lmc POST_BUILD
