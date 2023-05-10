@@ -252,7 +252,7 @@ void lmc_serialize_min_evt(const lmc_t lmc, const lmc_hand_evt_min_t evt,
                            unsigned char** out_buf, size_t* sz) {
     (void)lmc;
     *out_buf = evt->asBytes;
-    *sz = sizeof(evt);
+    *sz = sizeof(union lmc_hand_evt_min_u);
 }
 
 void lmc_stop_listening(lmc_t lmc) {
