@@ -1,7 +1,7 @@
 #include "win_ex.h"
 #include <time.h>
-
 #include <Windows.h>
+#include <math.h>
 
 static char s_err_msg_buf[1024 * 10];
 
@@ -38,4 +38,8 @@ char* current_time_str() {
     strTime[strlen(strTime) - 1] = 0;
 
     return strTime;
+}
+
+int32_t float2i32(float in) {
+    return (int32_t)(round(in * (1 << 16)));
 }

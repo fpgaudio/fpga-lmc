@@ -5,6 +5,8 @@
 #ifndef WIN_EX_H
 #define WIN_EX_H
 
+#include <stdint.h>
+
 #ifdef __GNUC__
 #define PACK( __Declaration__ ) __Declaration__ __attribute__((__packed__))
 #endif
@@ -15,5 +17,6 @@
 
 char* win32_err_str(void);
 char* current_time_str(void);
+int32_t float2i32(float in);
 
 #endif

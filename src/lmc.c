@@ -41,11 +41,11 @@ typedef PACK(struct {
 }) lmc_hand_evt_s;
 
 typedef PACK(struct {
-    float distance;
-    float indexAngle;
-    float middleAngle;
-    float ringAngle;
-    float pinkyAngle;
+    int32_t distance;
+    int32_t indexAngle;
+    int32_t middleAngle;
+    int32_t ringAngle;
+    int32_t pinkyAngle;
 }) lmc_hand_evt_small_s;
 
 union lmc_hand_evt_u {
@@ -162,11 +162,11 @@ static void on_raw_hand_frame(
 
     union lmc_hand_evt_min_u minified = {
         .asStruct = {
-            .distance = evt.asStruct.palm_distance,
-            .indexAngle = evt.asStruct.index.metacarpophalangeal_angle,
-            .middleAngle = evt.asStruct.middle.metacarpophalangeal_angle,
-            .ringAngle = evt.asStruct.ring.metacarpophalangeal_angle,
-            .pinkyAngle = evt.asStruct.pinky.metacarpophalangeal_angle
+            .distance = float2i32(evt.asStruct.palm_distance),
+            .indexAngle = float2i32(evt.asStruct.index.metacarpophalangeal_angle),
+            .middleAngle = float2i32(evt.asStruct.middle.metacarpophalangeal_angle),
+            .ringAngle = float2i32(evt.asStruct.ring.metacarpophalangeal_angle),
+            .pinkyAngle = float2i32(evt.asStruct.pinky.metacarpophalangeal_angle)
         }
     };
 
