@@ -22,7 +22,7 @@ target_link_libraries(libExampleConnection PUBLIC LeapSDK::LeapC)
 # ----------
 add_executable(fpga-lmc "src/fpga-lmc.c" "src/leap_math.c" "src/cli.c" "src/win_ex.c" "src/serial_device.c" "src/lmc.c")
 if(MSVC)
-  target_compile_options(fpga-lmc PRIVATE /W4 /WX /D_CRT_SECURE_NO_WARNINGS)
+  target_compile_options(fpga-lmc PRIVATE /W4 /WX /wd4201 /D_CRT_SECURE_NO_WARNINGS)
 else()
   target_compile_options(fpga-lmc PRIVATE -Wall -Wextra -Wpedantic -Werror)
 endif()
