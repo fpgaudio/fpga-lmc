@@ -5,11 +5,13 @@
 #include <stdbool.h>
 #include <stdio.h>
 #include "win_ex.h"
+#include <time.h>
 
 struct serial_device {
 	const char* path;
 	HANDLE hComm;
 	bool verbosity;
+	clock_t last_sample_time;
 };
 
 serial_device_t serial_device_open(const char* path, unsigned long baud_rate, bool verbose) {
@@ -29,7 +31,8 @@ serial_device_t serial_device_open(const char* path, unsigned long baud_rate, bo
 			0, NULL, OPEN_EXISTING,
 			0, NULL
 		),
-		.verbosity = verbose
+		.verbosity = verbose,
+		.last_sample_time = clock()
 	};
 
 	if (m_dev.hComm == INVALID_HANDLE_VALUE) {
@@ -98,6 +101,16 @@ bool serial_device_write(serial_device_t device, const unsigned char* data,
 	                     size_t data_len) {
 	DWORD data_len_dw, data_written;
 	(void)SIZETToDWord(data_len, &data_len_dw);
+
+	const clock_t sample_time = clock();
+	if (device->verbosity) {
+		const double sample_period =
+			((double)sample_time - (double)device->last_sample_time)
+			/ CLOCKS_PER_SEC;
+		const double sample_frequency = 1.0 / sample_period;
+		fprintf(stderr, "USART Write Rate: %.2fHz\n", sample_frequency);
+	}
+
 	if (!WriteFile(device->hComm, data, data_len_dw, &data_written, NULL)
 		|| data_written != data_len_dw) {
 		if (device->verbosity) {

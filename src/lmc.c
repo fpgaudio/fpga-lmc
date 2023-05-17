@@ -6,6 +6,7 @@
 #include <string.h>
 #include "leap_math.h"
 #include "win_ex.h"
+#include <time.h>
 
 typedef PACK(struct {
     float x;
@@ -60,6 +61,7 @@ union lmc_hand_evt_min_u {
 
 struct lmc {
     bool verbose;
+    clock_t last_sample_time;
     bool should_listen;
 };
 
@@ -186,7 +188,8 @@ static void on_raw_hand_frame(
 lmc_t lmc_connect(bool verbosity) {
     struct lmc m_lmc = {
         .verbose = verbosity,
-        .should_listen = true
+        .should_listen = true,
+        .last_sample_time = clock()
     };
 
     OpenConnection();
@@ -244,6 +247,15 @@ void lmc_listen_for_hand(lmc_t lmc, on_hand_evt_cb big_hand_cb,
             continue;
         }
 
+        const clock_t sample_time = clock();
+        if (lmc->verbose) {
+            const double sample_period =
+                ((double)sample_time - (double)lmc->last_sample_time)
+                / CLOCKS_PER_SEC;
+            const double sample_frequency = 1.0 / sample_period;
+            fprintf(stderr, "LMC Sample Rate: %.2fHz\n", sample_frequency);
+        }
+        lmc->last_sample_time = sample_time;
         on_raw_hand_frame(lmc, &frame->pHands[0], big_hand_cb, small_hand_cb);
     }
 }
