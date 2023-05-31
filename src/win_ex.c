@@ -40,6 +40,16 @@ char* current_time_str() {
     return strTime;
 }
 
+#define FLOAT_FP_CONVERSION_FACTOR (16)
+
 int32_t float2i32(float in) {
-    return (int32_t)(round(in * (1 << 16)));
+    return (int32_t)(round(in * (1 << FLOAT_FP_CONVERSION_FACTOR)));
+}
+
+float i322float(int32_t in) {
+    return (float)in / powf(2, FLOAT_FP_CONVERSION_FACTOR);
+}
+
+float bound_linear_normalize(float in, float coeff_k, float coeff_c, float minv, float maxv) {
+    return min(maxv, max(minv, coeff_k * in + coeff_c));
 }

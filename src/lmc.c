@@ -42,11 +42,11 @@ typedef PACK(struct {
 }) lmc_hand_evt_s;
 
 typedef PACK(struct {
-    int32_t distance;
-    int32_t indexAngle;
-    int32_t middleAngle;
-    int32_t ringAngle;
-    int32_t pinkyAngle;
+    uint8_t distance;
+    uint8_t indexAngle;
+    uint8_t middleAngle;
+    uint8_t ringAngle;
+    uint8_t pinkyAngle;
 }) lmc_hand_evt_small_s;
 
 union lmc_hand_evt_u {
@@ -64,6 +64,15 @@ struct lmc {
     clock_t last_sample_time;
     bool should_listen;
 };
+
+static void print_small_event(const lmc_hand_evt_small_s* evt) {
+    printf("d: %f, i: %d, m: %d, r: %d, p: %d\n",
+           i322float(evt->distance),
+           (evt->indexAngle),
+           (evt->middleAngle),
+           (evt->ringAngle),
+           (evt->ringAngle));
+}
 
 static void print_event(const lmc_hand_evt_s* evt) {
     printf("{ "
@@ -164,16 +173,17 @@ static void on_raw_hand_frame(
 
     union lmc_hand_evt_min_u minified = {
         .asStruct = {
-            .distance = float2i32(evt.asStruct.palm_distance),
-            .indexAngle = float2i32(evt.asStruct.index.metacarpophalangeal_angle),
-            .middleAngle = float2i32(evt.asStruct.middle.metacarpophalangeal_angle),
-            .ringAngle = float2i32(evt.asStruct.ring.metacarpophalangeal_angle),
-            .pinkyAngle = float2i32(evt.asStruct.pinky.metacarpophalangeal_angle)
+            .distance = (uint8_t)(255.0f * bound_linear_normalize(evt.asStruct.palm_distance, -1.0f/300.0f, 4.0f/3.0f, 0.0f, 1.0f)),
+            .indexAngle = (uint8_t)(255.0f * evt.asStruct.index.metacarpophalangeal_angle),
+            .middleAngle = (uint8_t)(255.0f * evt.asStruct.middle.metacarpophalangeal_angle),
+            .ringAngle = (uint8_t)(255.0f * evt.asStruct.ring.metacarpophalangeal_angle),
+            .pinkyAngle = (uint8_t)(255.0f * evt.asStruct.pinky.metacarpophalangeal_angle)
         }
     };
 
     if (lmc->verbose) {
         print_event(&evt.asStruct);
+        print_small_event(&minified.asStruct);
     }
 
     if (big_hand_cb != NULL) {
@@ -222,7 +232,8 @@ void lmc_close(lmc_t lmc) {
 }
 
 void lmc_listen_for_hand(lmc_t lmc, on_hand_evt_cb big_hand_cb,
-                         on_hand_evt_min_cb small_hand_cb) {
+                         on_hand_evt_min_cb small_hand_cb,
+                         const float min_sample_period) {
     long long last_frame_id = 0;
     lmc->should_listen = true;
     for (LEAP_TRACKING_EVENT* frame = GetFrame();
@@ -248,10 +259,13 @@ void lmc_listen_for_hand(lmc_t lmc, on_hand_evt_cb big_hand_cb,
         }
 
         const clock_t sample_time = clock();
+        const double sample_period =
+            ((double)sample_time - (double)lmc->last_sample_time)
+            / CLOCKS_PER_SEC;
+        if (sample_period < min_sample_period) {
+            continue;
+        }
         if (lmc->verbose) {
-            const double sample_period =
-                ((double)sample_time - (double)lmc->last_sample_time)
-                / CLOCKS_PER_SEC;
             const double sample_frequency = 1.0 / sample_period;
             fprintf(stderr, "LMC Sample Rate: %.2fHz\n", sample_frequency);
         }

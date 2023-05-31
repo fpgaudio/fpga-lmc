@@ -51,9 +51,12 @@ void lmc_serialize_min_evt(const lmc_t lmc, const lmc_hand_evt_min_t evt,
  *                    the full hand data by passing in NULL.
  * @param small_hand_cb Optional callback fired with the lmc_hand_evt_min_t
  *                      data. Ignore if uninterested by passing NULL.
+ * @param min_sample_period The minimum period when listening for the hand
+ *                          input.
  */
 void lmc_listen_for_hand(lmc_t lmc, on_hand_evt_cb big_hand_cb,
-	                     on_hand_evt_min_cb small_hand_cb);
+	                     on_hand_evt_min_cb small_hand_cb,
+	                     const float min_sample_period);
 
 /**
  * Stops the current tracking loop. Can (and should) be called from a

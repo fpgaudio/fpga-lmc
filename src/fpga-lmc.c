@@ -47,7 +47,7 @@ int main(int argc, char** argv) {
     if ((s_lmc = lmc_connect(s_args->verbose)) == NULL) {
         return 1;
     }
-    lmc_listen_for_hand(s_lmc, NULL, on_hand_evt);
+    lmc_listen_for_hand(s_lmc, NULL, on_hand_evt, 16e-3f);
 
     // Cleanup prior to exit.
     lmc_close(s_lmc);

@@ -110,6 +110,7 @@ bool serial_device_write(serial_device_t device, const unsigned char* data,
 		const double sample_frequency = 1.0 / sample_period;
 		fprintf(stderr, "USART Write Rate: %.2fHz\n", sample_frequency);
 	}
+	device->last_sample_time = sample_time;
 
 	if (!WriteFile(device->hComm, data, data_len_dw, &data_written, NULL)
 		|| data_written != data_len_dw) {
